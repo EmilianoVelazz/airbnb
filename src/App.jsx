@@ -12,6 +12,7 @@ import ItineraryDrawer from './components/ItineraryDrawer';
 import AuthModal from './components/AuthModal';
 import CheckoutWizardModal from './components/CheckoutWizardModal';
 import MyTripsModal from './components/MyTripsModal';
+import AnimeIntroOverlay from './components/AnimeIntroOverlay';
 import { CABINS } from './data/mockData';
 
 export default function App() {
@@ -184,6 +185,7 @@ export default function App() {
   const [isMyTripsOpen, setIsMyTripsOpen] = useState(false);
   const [wizardDiscountApplied, setWizardDiscountApplied] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
+  const [introKey, setIntroKey] = useState(1);
 
   // Smooth Scroll Progress Bar at top of viewport
   const { scrollYProgress } = useScroll();
@@ -419,6 +421,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#F7F4EF] dark:bg-[#0E1512] text-[#1C1B19] dark:text-[#F7F4EF] bg-arch-grid transition-colors duration-500">
+      {/* Cinematic Anime.js Intro Curtain & SVG Line Drawing */}
+      {introKey > 0 && (
+        <AnimeIntroOverlay
+          key={introKey}
+          onComplete={() => setIntroKey(0)}
+        />
+      )}
+
       {/* Top Scroll Progress Bar */}
       <motion.div
         style={{ scaleX }}
@@ -456,6 +466,7 @@ export default function App() {
         searchFilters={searchFilters}
         setSearchFilters={setSearchFilters}
         onExecuteSearch={handleExecuteHeroSearch}
+        onReplayIntro={() => setIntroKey(Date.now())}
       />
 
       {/* 01. Cabañas de Autor Section */}

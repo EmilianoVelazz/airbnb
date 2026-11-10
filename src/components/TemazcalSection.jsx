@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import anime from 'animejs';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Flame,
@@ -11,7 +12,6 @@ import {
   Volume2,
   Leaf,
   Users,
-  Calendar,
   Minus
 } from 'lucide-react';
 import {
@@ -30,7 +30,7 @@ export default function TemazcalSection({
   );
   const [selectedSchedules, setSelectedSchedules] = useState({
     'tem-1': '05:30 PM · Atardecer',
-    'tem-2': '06:30 PM · Crepúsculo',
+    'tem-2': '06:00 PM · Crepúsculo',
     'tem-3': '04:30 PM · Tarde'
   });
   const [selectedDays, setSelectedDays] = useState({
@@ -42,6 +42,48 @@ export default function TemazcalSection({
   const [addedId, setAddedId] = useState(null);
 
   const currentDoor = TEMAZCAL_DOORS[activeDoorIdx];
+  const tempDisplayRef = useRef(null);
+  const mandalaRef = useRef(null);
+  const prevTempRef = useRef(currentDoor.temp);
+
+  // Anime.js Thermal Counter + Sacred Geometry Mandala Rotation + Shockwave Pulse
+  useEffect(() => {
+    // 1. Animate number counter from previous temperature to new door temperature
+    const counterObj = { temp: prevTempRef.current };
+    anime({
+      targets: counterObj,
+      temp: currentDoor.temp,
+      round: 1,
+      duration: 900,
+      easing: 'easeOutExpo',
+      update: () => {
+        if (tempDisplayRef.current) {
+          tempDisplayRef.current.textContent = `${counterObj.temp}°C`;
+        }
+      }
+    });
+    prevTempRef.current = currentDoor.temp;
+
+    // 2. Rotate Sacred Geometry SVG Mandala & pulse shockwave rings
+    if (mandalaRef.current) {
+      anime({
+        targets: mandalaRef.current.querySelector('.anime-mandala-wheel'),
+        rotate: activeDoorIdx * 90,
+        scale: [0.85, 1],
+        duration: 1100,
+        easing: 'easeOutElastic(1, .65)'
+      });
+
+      anime({
+        targets: mandalaRef.current.querySelectorAll('.anime-heat-wave'),
+        scale: [0.8, 1.65],
+        opacity: [0.85, 0],
+        duration: 1600,
+        delay: anime.stagger(240),
+        easing: 'easeOutQuad'
+      });
+    }
+  }, [activeDoorIdx, currentDoor.temp]);
 
   const handleBookPackage = (pkg) => {
     const chosenSlot = selectedSchedules[pkg.id] || pkg.schedule[0];
@@ -81,13 +123,13 @@ export default function TemazcalSection({
           >
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#D15B2E]/20 border border-[#D15B2E]/40 text-[#F2CBB8] text-xs font-mono uppercase tracking-widest mb-4">
               <Flame className="w-3.5 h-3.5 text-[#D15B2E]" />
-              02 · SANTUARIO DE MEDICINA TRADICIONAL
+              02 · TEMAZCAL HOTEL GUERRERO · SIERRA NORTE DE PUEBLA
             </div>
             <h2 className="font-serif text-4xl sm:text-6xl font-semibold leading-[1.06] tracking-tight">
-              El Ritual del Temazcal: 28 piedras volcánicas y vapor de monte.
+              El Ritual del Temazcal: 28 piedras volcánicas, manzana y copal.
             </h2>
             <p className="mt-4 text-sm sm:text-base text-white/75 leading-relaxed">
-              Personaliza la infusión herbal de tu ceremonia según lo que tu cuerpo necesite (recuperación tras la ruta en moto, sueño profundo o desintoxicación en 4 puertas).
+              Personaliza la infusión herbal de tu ceremonia en Zacatlán (recuperación tras la ruta a Piedras Encimadas, infusión de manzana con canela o purificación en 4 puertas).
             </p>
           </motion.div>
 
@@ -122,17 +164,14 @@ export default function TemazcalSection({
 
         {/* Interactive 4-Doors Simulator + Architectural Render */}
         <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          {/* Left 7 Cols: Visual Render + Glowing Xictli Stone Core */}
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
+          {/* Left 7 Cols: Visual Render + Anime.js Sacred Geometry Xictli Stone Core */}
+          <div
+            ref={mandalaRef}
             className="lg:col-span-7 relative rounded-3xl overflow-hidden border border-white/15 min-h-[440px] flex flex-col justify-between p-6 sm:p-8 group"
           >
             <img
               src="/renders/temazcal-ritual.jpg"
-              alt="Santuario Temazcal Volcánico"
+              alt="Santuario Temazcal Volcánico Hotel Guerrero"
               className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-1000"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#090D0B] via-[#090D0B]/55 to-black/30" />
@@ -144,63 +183,92 @@ export default function TemazcalSection({
                 <span>XICTLI ACTIVO · {currentDoor.stoneCount}</span>
               </div>
 
-              <motion.div
-                key={currentDoor.temp}
-                initial={{ scale: 0.85, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D15B2E] text-white font-mono text-sm font-bold shadow-lg shadow-[#D15B2E]/50"
-              >
+              <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D15B2E] text-white font-mono text-sm font-bold shadow-lg shadow-[#D15B2E]/50">
                 <Thermometer className="w-4 h-4" />
                 <span>{currentDoor.temp}°C Vapor Herbal</span>
-              </motion.div>
+              </div>
             </div>
 
-            {/* Interactive Volcanic Stone Circle Visualizer */}
+            {/* Interactive Anime.js Sacred Geometry & Volcanic Stone Circle Visualizer */}
             <div className="relative z-10 my-auto py-8 flex flex-col items-center justify-center">
-              <motion.div
-                animate={{
-                  scale: [1, 1.08, 1],
-                  boxShadow:
-                    currentDoor.temp > 45
-                      ? '0 0 70px 18px rgba(209, 91, 46, 0.75)'
-                      : '0 0 40px 10px rgba(209, 91, 46, 0.45)'
-                }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                className="w-32 h-32 rounded-full bg-gradient-to-br from-[#F2CBB8] via-[#D15B2E] to-[#66291A] border-2 border-white/40 flex flex-col items-center justify-center text-center p-3 cursor-pointer"
+              {/* Expanding Anime.js Thermal Shockwave Rings */}
+              <span className="anime-heat-wave absolute w-36 h-36 rounded-full border-2 border-[#D15B2E] pointer-events-none opacity-0" />
+              <span className="anime-heat-wave absolute w-36 h-36 rounded-full border border-[#E9A789] pointer-events-none opacity-0" />
+
+              {/* Rotating Sacred Geometry SVG Wheel */}
+              <svg
+                viewBox="0 0 200 200"
+                className="anime-mandala-wheel absolute w-52 h-52 pointer-events-none opacity-75"
+              >
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="88"
+                  stroke="#E9A789"
+                  strokeWidth="1"
+                  strokeDasharray="6 6"
+                  fill="none"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="74"
+                  stroke="#D15B2E"
+                  strokeWidth="1.5"
+                  strokeDasharray="14 8"
+                  fill="none"
+                />
+                {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+                  <line
+                    key={deg}
+                    x1="100"
+                    y1="8"
+                    x2="100"
+                    y2="24"
+                    stroke="#F2CBB8"
+                    strokeWidth="2"
+                    transform={`rotate(${deg} 100 100)`}
+                  />
+                ))}
+              </svg>
+
+              <div
                 onClick={() =>
                   setActiveDoorIdx((prev) => (prev + 1) % TEMAZCAL_DOORS.length)
                 }
                 title="Haz clic para avanzar a la siguiente Puerta del Temazcal"
+                className="relative w-32 h-32 rounded-full bg-gradient-to-br from-[#F2CBB8] via-[#D15B2E] to-[#66291A] border-2 border-white/50 flex flex-col items-center justify-center text-center p-3 cursor-pointer shadow-[0_0_55px_rgba(209,91,46,0.75)] hover:scale-105 transition-transform"
               >
-                <span className="text-[10px] font-mono uppercase tracking-widest text-white/80">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-white/85">
                   PUERTA 0{currentDoor.door}
                 </span>
-                <span className="font-serif text-3xl font-bold text-white">
+                <span
+                  ref={tempDisplayRef}
+                  className="font-serif text-3xl font-bold text-white"
+                >
                   {currentDoor.temp}°C
                 </span>
                 <span className="text-[10px] font-mono text-white/90 mt-0.5">
                   Click → Siguiente
                 </span>
-              </motion.div>
+              </div>
             </div>
 
             {/* Bottom Door Selector Tabs inside Render */}
             <div className="relative z-10">
               <div className="text-[11px] font-mono uppercase tracking-wider text-white/60 mb-2">
-                Explora cada una de las 4 Puertas del Temazcal:
+                Explora cada una de las 4 Puertas del Temazcal (Animación Anime.js):
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {TEMAZCAL_DOORS.map((d, idx) => {
                   const active = idx === activeDoorIdx;
                   return (
-                    <motion.button
+                    <button
                       key={d.door}
-                      whileHover={{ y: -2 }}
-                      whileTap={{ scale: 0.96 }}
                       onClick={() => setActiveDoorIdx(idx)}
                       className={`p-3 rounded-2xl text-left border transition-all ${
                         active
-                          ? 'bg-[#D15B2E] border-white/40 text-white shadow-lg'
+                          ? 'bg-[#D15B2E] border-white/40 text-white shadow-lg -translate-y-0.5'
                           : 'bg-black/55 backdrop-blur-md border-white/15 text-white/75 hover:bg-white/10'
                       }`}
                     >
@@ -210,12 +278,12 @@ export default function TemazcalSection({
                       <div className="font-serif text-sm font-bold truncate mt-0.5">
                         {d.name.split('·')[1]}
                       </div>
-                    </motion.button>
+                    </button>
                   );
                 })}
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Right 5 Cols: Active Door Details Card */}
           <div className="lg:col-span-5 flex flex-col justify-between rounded-3xl bg-[#151F1B] border border-white/10 p-6 sm:p-8">
@@ -303,10 +371,10 @@ export default function TemazcalSection({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-white">
-                2. Elige Día, Horario y Modalidad de tu Ceremonia
+                2. Elige Día, Horario y Modalidad en Hotel Guerrero
               </h3>
               <p className="text-xs text-white/60 mt-0.5">
-                Se programa directamente en el itinerario de tu estancia
+                Se programa directamente en el itinerario de tu estancia en Zacatlán
               </p>
             </div>
 
@@ -452,7 +520,9 @@ export default function TemazcalSection({
                       <span className="block text-[11px] text-white/55">
                         MXN ·{' '}
                         {pkg.perPerson
-                          ? `${paxCount} ${paxCount === 1 ? 'persona' : 'personas'}`
+                          ? `${paxCount} ${
+                              paxCount === 1 ? 'persona' : 'personas'
+                            }`
                           : pkg.unitLabel}
                       </span>
                     </div>

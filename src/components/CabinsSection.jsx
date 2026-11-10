@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import anime from 'animejs';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Star,
@@ -26,9 +27,55 @@ import {
 } from 'lucide-react';
 import { CABINS, CATEGORIES } from '../data/mockData';
 
+// Helper: Spawn an Anime.js 12-particle radial firework burst on any button click
+function triggerAnimeParticleBurst(buttonEl, colors = ['#D15B2E', '#E9A789', '#2E4F42']) {
+  if (!buttonEl) return;
+  const rect = buttonEl.getBoundingClientRect();
+  const container = document.createElement('div');
+  container.style.position = 'fixed';
+  container.style.left = `${rect.left + rect.width / 2}px`;
+  container.style.top = `${rect.top + rect.height / 2}px`;
+  container.style.pointerEvents = 'none';
+  container.style.zIndex = '9999';
+  document.body.appendChild(container);
+
+  const particles = Array.from({ length: 14 }, (_, i) => {
+    const dot = document.createElement('span');
+    const size = anime.random(5, 9);
+    dot.style.position = 'absolute';
+    dot.style.width = `${size}px`;
+    dot.style.height = `${size}px`;
+    dot.style.borderRadius = '9999px';
+    dot.style.backgroundColor = colors[i % colors.length];
+    dot.style.boxShadow = `0 0 10px ${colors[i % colors.length]}`;
+    container.appendChild(dot);
+    return dot;
+  });
+
+  anime({
+    targets: particles,
+    translateX: (_, i) => {
+      const angle = (i / particles.length) * Math.PI * 2;
+      const distance = anime.random(28, 64);
+      return Math.cos(angle) * distance;
+    },
+    translateY: (_, i) => {
+      const angle = (i / particles.length) * Math.PI * 2;
+      const distance = anime.random(28, 64);
+      return Math.sin(angle) * distance;
+    },
+    scale: [1.4, 0],
+    opacity: [1, 0],
+    duration: 780,
+    easing: 'easeOutExpo',
+    complete: () => {
+      container.remove();
+    }
+  });
+}
+
 function CabinCard({
   cabin,
-  index,
   nights,
   checkIn,
   checkOut,
@@ -44,6 +91,7 @@ function CabinCard({
 }) {
   const [imgIdx, setImgIdx] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef(null);
 
   const nextImg = (e) => {
     e.stopPropagation();
@@ -57,7 +105,27 @@ function CabinCard({
 
   const handleQuickAdd = (e) => {
     e.stopPropagation();
+    triggerAnimeParticleBurst(e.currentTarget, ['#2E4F42', '#97BAAA', '#D15B2E']);
+    anime({
+      targets: cardRef.current,
+      scale: [1, 0.97, 1.02, 1],
+      duration: 550,
+      easing: 'easeOutElastic(1, .6)'
+    });
     onQuickAddCabin(cabin);
+  };
+
+  const handleHeartClick = (e) => {
+    e.stopPropagation();
+    triggerAnimeParticleBurst(e.currentTarget, ['#D15B2E', '#F2CBB8', '#FF6B4A']);
+    anime({
+      targets: e.currentTarget,
+      scale: [1, 1.45, 0.9, 1.15, 1],
+      rotate: [0, -15, 15, 0],
+      duration: 650,
+      easing: 'easeOutElastic(1, .5)'
+    });
+    onToggleWishlist(cabin.id);
   };
 
   const displayPrice = showTotalWithNights
@@ -65,17 +133,8 @@ function CabinCard({
     : cabin.pricePerNight;
 
   return (
-    <motion.article
-      layout
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-30px' }}
-      transition={{
-        duration: 0.45,
-        delay: index * 0.05,
-        ease: [0.22, 1, 0.36, 1]
-      }}
-      whileHover={{ y: -5 }}
+    <article
+      ref={cardRef}
       onMouseEnter={() => {
         setIsHovered(true);
         if (onHoverCabin) onHoverCabin(cabin.id);
@@ -84,10 +143,10 @@ function CabinCard({
         setIsHovered(false);
       }}
       onClick={() => onSelectCabin(cabin)}
-      className={`group cursor-pointer rounded-3xl bg-white dark:bg-[#151F1B] border overflow-hidden transition-all duration-300 flex flex-col ${
+      className={`anime-cabin-card group cursor-pointer rounded-3xl bg-white dark:bg-[#151F1B] border overflow-hidden transition-shadow duration-300 flex flex-col hover:-translate-y-1.5 ${
         isBookedInItinerary
           ? 'border-[#2E4F42] ring-2 ring-[#2E4F42]/30 shadow-xl'
-          : 'border-black/8 dark:border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_24px_48px_rgba(209,91,46,0.14)]'
+          : 'border-black/8 dark:border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_24px_48px_rgba(209,91,46,0.16)]'
       }`}
     >
       {/* Image Render Carousel Container */}
@@ -100,7 +159,7 @@ function CabinCard({
             initial={{ opacity: 0.4, scale: 1.05 }}
             animate={{
               opacity: 1,
-              scale: isHovered ? 1.04 : 1.0
+              scale: isHovered ? 1.05 : 1.0
             }}
             exit={{ opacity: 0.4 }}
             transition={{ duration: 0.4 }}
@@ -120,9 +179,7 @@ function CabinCard({
 
           <div className="flex items-center gap-1.5">
             {/* Compare Button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleCompare(cabin);
@@ -136,16 +193,11 @@ function CabinCard({
             >
               <Scale className="w-3 h-3" />
               <span>{isCompared ? 'Comparando' : 'Comparar'}</span>
-            </motion.button>
+            </button>
 
-            {/* Wishlist Button */}
-            <motion.button
-              whileHover={{ scale: 1.15 }}
-              whileTap={{ scale: 0.8 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleWishlist(cabin.id);
-              }}
+            {/* Wishlist Button with Anime.js Firework Burst */}
+            <button
+              onClick={handleHeartClick}
               className="w-8 h-8 rounded-full bg-black/45 backdrop-blur-md border border-white/25 flex items-center justify-center text-white hover:bg-black/65 transition-colors"
               aria-label="Guardar en favoritos"
             >
@@ -156,7 +208,7 @@ function CabinCard({
                     : 'text-white'
                 }`}
               />
-            </motion.button>
+            </button>
           </div>
         </div>
 
@@ -294,14 +346,9 @@ function CabinCard({
         <div className="mt-4 pt-3.5 border-t border-black/8 dark:border-white/10 flex items-center justify-between gap-2">
           <div>
             <div className="flex items-baseline gap-1">
-              <motion.span
-                key={displayPrice}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="font-mono text-lg font-bold text-[#1C1B19] dark:text-white"
-              >
+              <span className="font-mono text-lg font-bold text-[#1C1B19] dark:text-white">
                 ${displayPrice.toLocaleString('es-MX')}
-              </motion.span>
+              </span>
               <span className="text-xs text-neutral-500 dark:text-neutral-400">
                 MXN / {showTotalWithNights ? `total ${nights}n` : 'noche'}
               </span>
@@ -315,9 +362,7 @@ function CabinCard({
             </span>
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.94 }}
+          <button
             onClick={handleQuickAdd}
             className={`px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
               isBookedInItinerary
@@ -336,10 +381,10 @@ function CabinCard({
                 <span>Elegir Cabaña</span>
               </>
             )}
-          </motion.button>
+          </button>
         </div>
       </div>
-    </motion.article>
+    </article>
   );
 }
 
@@ -358,13 +403,15 @@ export default function CabinsSection({
   const [showTotalWithNights, setShowTotalWithNights] = useState(false);
   const [maxPrice, setMaxPrice] = useState(6500);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('featured'); // 'featured' | 'price-asc' | 'rating' | 'altitude'
+  const [sortBy, setSortBy] = useState('featured');
   const [splitMapView, setSplitMapView] = useState(false);
   const [hoveredCabinId, setHoveredCabinId] = useState(CABINS[0].id);
 
   // Side-by-side comparison state (up to 3 cabins)
   const [compareList, setCompareList] = useState([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
+
+  const gridRef = useRef(null);
 
   const handleToggleCompare = (cabin) => {
     setCompareList((prev) => {
@@ -443,6 +490,30 @@ export default function CabinsSection({
     sortBy
   ]);
 
+  // Anime.js Staggered 3D Grid Cascade whenever category, sort, or filters change!
+  useEffect(() => {
+    if (!gridRef.current) return;
+    const cards = gridRef.current.querySelectorAll('.anime-cabin-card');
+    if (!cards.length) return;
+
+    anime.remove(cards);
+    anime({
+      targets: cards,
+      translateY: [42, 0],
+      scale: [0.93, 1],
+      opacity: [0, 1],
+      duration: 820,
+      delay: anime.stagger(85, { from: 'first' }),
+      easing: 'easeOutExpo'
+    });
+  }, [
+    selectedCategory,
+    sortBy,
+    onlyWishlistFilter,
+    searchFilters.zone,
+    splitMapView
+  ]);
+
   const resetAllFilters = () => {
     setSelectedCategory('all');
     setMaxPrice(6500);
@@ -460,27 +531,33 @@ export default function CabinsSection({
   };
 
   const activeHoveredCabin =
-    CABINS.find((c) => c.id === hoveredCabinId) || filteredCabins[0] || CABINS[0];
+    CABINS.find((c) => c.id === hoveredCabinId) ||
+    filteredCabins[0] ||
+    CABINS[0];
 
   return (
-    <section id="cabanas" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section
+      id="cabanas"
+      className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+    >
       {/* Section Header */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
         <div>
           <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-[#D15B2E] mb-2">
             <span className="w-6 h-[1px] bg-[#D15B2E]" />
-            01 · ESTANCIAS ARQUITECTÓNICAS VERIFICADAS
+            01 · HOTEL GUERRERO · ZACATLÁN DE LAS MANZANAS, PUEBLA
           </div>
           <h2 className="font-serif text-4xl sm:text-5xl font-bold text-[#1C1B19] dark:text-white tracking-tight">
-            Elige tu cabaña base en la montaña
+            Elige tu cabaña base en la niebla de Zacatlán
           </h2>
           <p className="mt-2 text-sm sm:text-base text-neutral-600 dark:text-neutral-300 max-w-2xl">
             Mostrando disponibilidad para{' '}
             <strong className="text-[#D15B2E]">
-              {searchFilters.checkIn} → {searchFilters.checkOut} ({searchFilters.nights}{' '}
+              {searchFilters.checkIn} → {searchFilters.checkOut} (
+              {searchFilters.nights}{' '}
               {searchFilters.nights === 1 ? 'noche' : 'noches'})
             </strong>
-            . Haz clic en cualquier cabaña para ver su distribución, reseñas y configurar tu paquete.
+            . Todas nuestras cabañas incluyen sidra artesanal de bienvenida y pan relleno de queso.
           </p>
         </div>
 
@@ -548,7 +625,7 @@ export default function CabinsSection({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar por 'jacuzzi', 'árbol', 'cobre', 'laguna', 'arroyo'..."
+            placeholder="Buscar 'Jilgueros', 'Piedras Encimadas', 'Tulimán', 'jacuzzi'..."
             className="w-full pl-10 pr-8 py-2.5 rounded-2xl bg-white dark:bg-[#151F1B] border border-black/10 dark:border-white/10 text-xs focus:outline-none focus:border-[#D15B2E]"
           />
           {searchQuery && (
@@ -676,7 +753,7 @@ export default function CabinsSection({
             No encontramos cabañas con esa combinación de filtros
           </p>
           <p className="text-sm text-neutral-500 mt-1">
-            Prueba restableciendo los filtros para ver los 6 refugios disponibles.
+            Prueba restableciendo los filtros para ver los 6 refugios disponibles en Zacatlán.
           </p>
           <button
             onClick={resetAllFilters}
@@ -687,8 +764,11 @@ export default function CabinsSection({
         </motion.div>
       ) : (
         <div
+          ref={gridRef}
           className={`grid gap-7 items-start ${
-            splitMapView ? 'grid-cols-1 lg:grid-cols-12' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+            splitMapView
+              ? 'grid-cols-1 lg:grid-cols-12'
+              : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
           }`}
         >
           {/* Left Cards Column (When splitMapView is active) */}
@@ -699,11 +779,10 @@ export default function CabinsSection({
                 : 'contents'
             }
           >
-            {filteredCabins.map((cabin, index) => (
+            {filteredCabins.map((cabin) => (
               <CabinCard
                 key={cabin.id}
                 cabin={cabin}
-                index={index}
                 nights={searchFilters.nights}
                 checkIn={searchFilters.checkIn}
                 checkOut={searchFilters.checkOut}
@@ -725,10 +804,10 @@ export default function CabinsSection({
             <div className="lg:col-span-5 sticky top-24 rounded-3xl bg-[#14201B] border border-white/15 overflow-hidden shadow-2xl p-5 text-white">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[11px] font-mono uppercase tracking-wider text-[#E9A789]">
-                  MAPA EN VIVO · PASA EL CURSOR SOBRE UNA CABAÑA
+                  MAPA ZACATLÁN EN VIVO · PASA EL CURSOR SOBRE UNA CABAÑA
                 </span>
                 <span className="text-xs font-mono text-white/60">
-                  {filteredCabins.length} refugios
+                  {filteredCabins.length} cabañas
                 </span>
               </div>
 
@@ -795,7 +874,8 @@ export default function CabinsSection({
                       {activeHoveredCabin.name}
                     </div>
                     <div className="text-xs text-white/75 font-mono">
-                      ${activeHoveredCabin.pricePerNight.toLocaleString('es-MX')} MXN / noche · ★ {activeHoveredCabin.rating}
+                      ${activeHoveredCabin.pricePerNight.toLocaleString('es-MX')}{' '}
+                      MXN / noche · ★ {activeHoveredCabin.rating}
                     </div>
                   </div>
                 </div>
@@ -826,10 +906,11 @@ export default function CabinsSection({
             </div>
             <div className="text-xs">
               <span className="font-bold block">
-                {compareList.length} {compareList.length === 1 ? 'cabaña' : 'cabañas'} para comparar
+                {compareList.length}{' '}
+                {compareList.length === 1 ? 'cabaña' : 'cabañas'} para comparar
               </span>
               <span className="text-[10px] text-white/60">
-                Selecciona hasta 3 refugios
+                Selecciona hasta 3 cabañas
               </span>
             </div>
             <button
@@ -868,7 +949,7 @@ export default function CabinsSection({
               <div className="flex items-center justify-between pb-4 border-b border-black/10 dark:border-white/10">
                 <div>
                   <span className="text-xs font-mono uppercase text-[#D15B2E]">
-                    COMPARATIVA ARQUITECTÓNICA Y DE SERVICIOS
+                    COMPARATIVA HOTEL GUERRERO · ZACATLÁN, PUEBLA
                   </span>
                   <h3 className="font-serif text-3xl font-bold">
                     Comparando {compareList.length} Cabañas
@@ -904,7 +985,9 @@ export default function CabinsSection({
                       <div className="mt-4 space-y-2 text-xs border-t border-black/10 dark:border-white/10 pt-3">
                         <div className="flex justify-between">
                           <span className="text-neutral-500">Zona:</span>
-                          <span className="font-semibold text-right">{c.zone.split('·')[0]}</span>
+                          <span className="font-semibold text-right">
+                            {c.zone.split('·')[0]}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-neutral-500">Altitud:</span>
@@ -912,19 +995,35 @@ export default function CabinsSection({
                         </div>
                         <div className="flex justify-between">
                           <span className="text-neutral-500">Capacidad:</span>
-                          <span>{c.guests} huéspedes ({c.bedrooms} hab)</span>
+                          <span>
+                            {c.guests} huéspedes ({c.bedrooms} hab)
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-neutral-500">Internet:</span>
-                          <span className="font-mono text-[#2E4F42] dark:text-[#97BAAA]">{c.wifiSpeed}</span>
+                          <span className="font-mono text-[#2E4F42] dark:text-[#97BAAA]">
+                            {c.wifiSpeed}
+                          </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-neutral-500">Temazcal Privado:</span>
-                          <span>{c.hasPrivateTemazcal ? '✓ Sí, en propiedad' : 'En Santuario Central'}</span>
+                          <span className="text-neutral-500">
+                            Temazcal Privado:
+                          </span>
+                          <span>
+                            {c.hasPrivateTemazcal
+                              ? '✓ Sí, en cabaña'
+                              : 'En Santuario Central'}
+                          </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-neutral-500">Acceso Moto Trail:</span>
-                          <span>{c.hasMotoTrailAccess ? '✓ Salida directa' : 'En Basecamp'}</span>
+                          <span className="text-neutral-500">
+                            Ruta Moto Zacatlán:
+                          </span>
+                          <span>
+                            {c.hasMotoTrailAccess
+                              ? '✓ Salida directa'
+                              : 'En Basecamp'}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-neutral-500">Pet-Friendly:</span>

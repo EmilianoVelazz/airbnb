@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import anime from 'animejs';
 import {
   motion,
   AnimatePresence,
@@ -19,15 +20,23 @@ import {
   Layers,
   PawPrint,
   ChevronDown,
-  Sparkles,
-  Check
+  Check,
+  Sparkles
 } from 'lucide-react';
 import { HERO_SCENES, ZONES, DATE_PRESETS } from '../data/mockData';
+
+const PARTICLE_SEEDS = Array.from({ length: 18 }, (_, i) => ({
+  id: i,
+  left: `${(i * 19 + 7) % 94}%`,
+  top: `${(i * 23 + 11) % 86}%`,
+  size: (i % 3) * 3 + 4
+}));
 
 export default function HeroRenderShowcase({
   searchFilters,
   setSearchFilters,
-  onExecuteSearch
+  onExecuteSearch,
+  onReplayIntro
 }) {
   const [activeSceneIndex, setActiveSceneIndex] = useState(0);
   const [activeHotspot, setActiveHotspot] = useState(HERO_SCENES[0].hotspots[0].id);
@@ -38,10 +47,76 @@ export default function HeroRenderShowcase({
   const [openPopover, setOpenPopover] = useState(null);
 
   const heroRef = useRef(null);
+  const headlineRef = useRef(null);
+  const particlesRef = useRef(null);
+
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ['start start', 'end start']
   });
+
+  const currentScene = HERO_SCENES[activeSceneIndex];
+
+  // 1. Anime.js Word-by-Word 3D Staggered Headline + Stats Choreography on Scene Switch
+  useEffect(() => {
+    anime.remove('.anime-hero-word, .anime-hero-sub, .anime-stat-card');
+
+    const tl = anime.timeline({ easing: 'easeOutExpo' });
+
+    tl.add({
+      targets: '.anime-hero-word',
+      translateY: [48, 0],
+      rotateZ: [6, 0],
+      opacity: [0, 1],
+      duration: 950,
+      delay: anime.stagger(55)
+    })
+      .add(
+        {
+          targets: '.anime-hero-sub',
+          translateY: [20, 0],
+          opacity: [0, 1],
+          duration: 750
+        },
+        '-=650'
+      )
+      .add(
+        {
+          targets: '.anime-stat-card',
+          scale: [0.85, 1],
+          translateY: [18, 0],
+          opacity: [0, 1],
+          duration: 800,
+          delay: anime.stagger(90),
+          easing: 'easeOutElastic(1, .75)'
+        },
+        '-=550'
+      );
+  }, [activeSceneIndex]);
+
+  // 2. Anime.js Continuous Atmospheric Particle Engine (Fireflies / Volcanic Embers / Trail Sparks)
+  useEffect(() => {
+    if (!particlesRef.current) return;
+    const nodes = particlesRef.current.querySelectorAll('.anime-hero-particle');
+
+    const anim = anime({
+      targets: nodes,
+      translateY: () => anime.random(-95, -25),
+      translateX: () => anime.random(-45, 45),
+      scale: () => [anime.random(0.6, 1), anime.random(1.2, 1.9)],
+      opacity: [
+        { value: 0.85, duration: 900 },
+        { value: 0.15, duration: 1400 }
+      ],
+      easing: 'easeInOutSine',
+      duration: () => anime.random(2600, 4800),
+      delay: anime.stagger(140),
+      direction: 'alternate',
+      loop: true
+    });
+
+    return () => anim.pause();
+  }, [activeSceneIndex]);
 
   // Auto-advance hero scenes unless user is hovering/interacting
   useEffect(() => {
@@ -82,8 +157,6 @@ export default function HeroRenderShowcase({
     setIsPaused(false);
   };
 
-  const currentScene = HERO_SCENES[activeSceneIndex];
-
   const handleSceneChange = (idx) => {
     setActiveSceneIndex(idx);
     setActiveHotspot(HERO_SCENES[idx].hotspots[0].id);
@@ -98,6 +171,9 @@ export default function HeroRenderShowcase({
       dateLabel: preset.label
     }));
   };
+
+  // Split title into words for Anime.js staggered 3D word animation
+  const titleWords = currentScene.title.split(' ');
 
   return (
     <section
@@ -131,6 +207,31 @@ export default function HeroRenderShowcase({
           <div className="absolute inset-0 bg-gradient-to-r from-[#090F0C]/90 via-[#090F0C]/50 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#090F0C] via-transparent to-[#090F0C]/45" />
         </motion.div>
+
+        {/* Anime.js Floating Atmospheric Particles (Embers / Fireflies / Mist) */}
+        <div
+          ref={particlesRef}
+          className="absolute inset-0 pointer-events-none z-10 overflow-hidden"
+        >
+          {PARTICLE_SEEDS.map((p) => (
+            <span
+              key={p.id}
+              style={{
+                left: p.left,
+                top: p.top,
+                width: `${p.size}px`,
+                height: `${p.size}px`
+              }}
+              className={`anime-hero-particle absolute rounded-full blur-[0.5px] ${
+                activeSceneIndex === 1
+                  ? 'bg-[#D15B2E] shadow-[0_0_14px_#D15B2E]'
+                  : activeSceneIndex === 2
+                  ? 'bg-[#E9A789] shadow-[0_0_12px_#E9A789]'
+                  : 'bg-[#F2ECE1] shadow-[0_0_12px_#F2ECE1]'
+              }`}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Interactive 3D Render Hotspots Overlay */}
@@ -201,17 +302,12 @@ export default function HeroRenderShowcase({
         className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6 md:pt-10 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-8"
       >
         {/* Left Editorial Column */}
-        <div className="max-w-2xl">
-          <div className="flex flex-wrap items-center gap-3 mb-5">
-            <motion.div
-              key={currentScene.badge}
-              initial={{ opacity: 0, x: -15 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-mono tracking-wider"
-            >
+        <div className="max-w-2xl" ref={headlineRef}>
+          <div className="flex flex-wrap items-center gap-2.5 mb-5">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-mono tracking-wider">
               <span className="w-2 h-2 rounded-full bg-[#D15B2E] animate-pulse" />
               {currentScene.badge}
-            </motion.div>
+            </div>
 
             <button
               onClick={() => setShowHotspots(!showHotspots)}
@@ -222,36 +318,42 @@ export default function HeroRenderShowcase({
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              {showHotspots ? 'Pines Arquitectónicos: ON' : 'Pines: OFF'}
+              {showHotspots ? 'Pines 3D: ON' : 'Pines: OFF'}
             </button>
+
+            {onReplayIntro && (
+              <button
+                onClick={onReplayIntro}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-[#D15B2E] border border-white/20 text-white text-xs font-mono transition-colors"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#E9A789]" />
+                <span>Intro Anime.js</span>
+              </button>
+            )}
           </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentScene.id}
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -18 }}
-              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl text-white font-semibold leading-[1.03] tracking-tight">
-                {currentScene.title}
-              </h1>
-              <p className="mt-4 text-sm sm:text-base md:text-lg text-white/80 max-w-xl leading-relaxed font-normal">
-                {currentScene.subtitle}
-              </p>
-            </motion.div>
-          </AnimatePresence>
+          {/* Anime.js Staggered Word-by-Word Headline */}
+          <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl text-white font-semibold leading-[1.04] tracking-tight flex flex-wrap gap-x-3 gap-y-1">
+            {titleWords.map((word, idx) => (
+              <span
+                key={`${currentScene.id}-w-${idx}`}
+                className="anime-hero-word inline-block origin-bottom-left"
+              >
+                {word}
+              </span>
+            ))}
+          </h1>
 
-          {/* Live Atmospheric Telemetry Strip */}
+          <p className="anime-hero-sub mt-4 text-sm sm:text-base md:text-lg text-white/80 max-w-xl leading-relaxed font-normal">
+            {currentScene.subtitle}
+          </p>
+
+          {/* Live Atmospheric Telemetry Strip animated via Anime.js */}
           <div className="mt-7 grid grid-cols-3 gap-3 max-w-lg">
-            {currentScene.stats.map((st, i) => (
-              <motion.div
+            {currentScene.stats.map((st) => (
+              <div
                 key={st.label}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="p-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/15"
+                className="anime-stat-card p-3 rounded-2xl bg-black/45 backdrop-blur-md border border-white/15"
               >
                 <div className="text-[10px] font-mono uppercase tracking-wider text-white/55">
                   {st.label}
@@ -259,7 +361,7 @@ export default function HeroRenderShowcase({
                 <div className="text-xs sm:text-sm font-semibold text-white mt-0.5 font-mono">
                   {st.value}
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -318,7 +420,7 @@ export default function HeroRenderShowcase({
             <div className="md:col-span-3 px-3.5 py-2 rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
               <label className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                 <MapPin className="w-3.5 h-3.5 text-[#D15B2E]" />
-                Región de Montaña
+                Zona en Zacatlán
               </label>
               <select
                 value={searchFilters.zone}
@@ -372,7 +474,7 @@ export default function HeroRenderShowcase({
                   >
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                        Elige Fechas o Escapada
+                        Elige Fechas en Hotel Guerrero
                       </span>
                       <button
                         onClick={() => setOpenPopover(null)}
