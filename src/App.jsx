@@ -500,7 +500,7 @@ export default function App() {
       />
 
       {/* Footer */}
-      <footer className="bg-[#0B110E] text-white py-16 border-t border-white/10">
+      <footer className="bg-[#0B110E] text-white pt-16 pb-28 lg:pb-16 border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-10">
           <div className="md:col-span-2 space-y-3">
             <div className="flex items-center gap-3">
@@ -665,10 +665,10 @@ export default function App() {
             initial={{ opacity: 0, y: 40, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.92 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full bg-[#1C1B19] dark:bg-[#D15B2E] text-white text-xs font-semibold shadow-2xl border border-white/15 flex items-center gap-2.5"
+            className="fixed bottom-20 lg:bottom-6 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-50 px-4 sm:px-5 py-3 rounded-full bg-[#1C1B19] dark:bg-[#D15B2E] text-white text-xs font-semibold shadow-2xl border border-white/15 flex items-center justify-center gap-2.5 text-center"
           >
-            <Sparkles className="w-4 h-4 text-[#E9A789]" />
-            <span>{toastMessage}</span>
+            <Sparkles className="w-4 h-4 text-[#E9A789] shrink-0" />
+            <span className="truncate">{toastMessage}</span>
           </motion.div>
         )}
       </AnimatePresence>

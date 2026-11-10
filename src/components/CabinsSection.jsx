@@ -212,31 +212,23 @@ function CabinCard({
           </div>
         </div>
 
-        {/* Left / Right Carousel Controls on Hover */}
-        <AnimatePresence>
-          {isHovered && (
-            <>
-              <motion.button
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -8 }}
-                onClick={prevImg}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 text-[#1C1B19] shadow-md flex items-center justify-center hover:scale-110 transition-transform z-10"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </motion.button>
-              <motion.button
-                initial={{ opacity: 0, x: 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 8 }}
-                onClick={nextImg}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 text-[#1C1B19] shadow-md flex items-center justify-center hover:scale-110 transition-transform z-10"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </motion.button>
-            </>
-          )}
-        </AnimatePresence>
+        {/* Left / Right Carousel Controls (Always accessible on touch screens, hover on desktop) */}
+        <button
+          type="button"
+          onClick={prevImg}
+          aria-label="Imagen anterior"
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 text-[#1C1B19] shadow-md flex items-center justify-center opacity-90 lg:opacity-0 lg:group-hover:opacity-100 hover:scale-110 transition-all z-10"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <button
+          type="button"
+          onClick={nextImg}
+          aria-label="Siguiente imagen"
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 text-[#1C1B19] shadow-md flex items-center justify-center opacity-90 lg:opacity-0 lg:group-hover:opacity-100 hover:scale-110 transition-all z-10"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
 
         {/* Bottom Overlay inside Image: Altitude + Service Badges + Dots */}
         <div className="absolute bottom-3 left-3.5 right-3.5 flex items-end justify-between z-10">
@@ -892,7 +884,7 @@ export default function CabinsSection({
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
-            className="fixed bottom-6 right-6 z-40 p-3.5 rounded-2xl bg-[#151F1B] text-white border border-white/20 shadow-2xl flex items-center gap-3"
+            className="fixed bottom-20 left-3 right-3 sm:left-auto sm:right-6 sm:bottom-6 z-40 p-3 sm:p-3.5 rounded-2xl bg-[#151F1B] text-white border border-white/20 shadow-2xl flex items-center justify-between sm:justify-start gap-2.5 sm:gap-3"
           >
             <div className="flex items-center -space-x-2">
               {compareList.map((c) => (

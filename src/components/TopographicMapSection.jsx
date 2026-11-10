@@ -53,7 +53,7 @@ export default function TopographicMapSection({ onSelectCabin }) {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           {/* Interactive SVG Topographic Map Canvas */}
-          <div className="lg:col-span-8 relative rounded-3xl bg-[#16231D] border border-white/15 overflow-hidden min-h-[460px] shadow-2xl select-none">
+          <div className="lg:col-span-8 relative rounded-3xl bg-[#16231D] border border-white/15 overflow-hidden min-h-[360px] sm:min-h-[460px] shadow-2xl select-none">
             {/* Topographic Contour Lines SVG */}
             <svg
               viewBox="0 0 800 500"
@@ -155,7 +155,7 @@ export default function TopographicMapSection({ onSelectCabin }) {
                   whileHover={{ scale: 1.12, zIndex: 30 }}
                   whileTap={{ scale: 0.94 }}
                   onClick={() => setSelectedPinId(cabin.id)}
-                  className={`absolute -translate-x-1/2 -translate-y-1/2 px-3 py-1.5 rounded-full font-mono text-xs font-bold shadow-xl transition-all flex items-center gap-1.5 ${
+                  className={`absolute -translate-x-1/2 -translate-y-1/2 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full font-mono text-[10px] sm:text-xs font-bold shadow-xl transition-all flex items-center gap-1 sm:gap-1.5 ${
                     isSelected
                       ? 'bg-[#D15B2E] text-white scale-110 z-30 ring-4 ring-[#D15B2E]/35'
                       : 'bg-white text-[#1C1B19] hover:bg-[#1C1B19] hover:text-white z-20'

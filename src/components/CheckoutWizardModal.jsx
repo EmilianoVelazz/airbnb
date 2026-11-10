@@ -601,20 +601,20 @@ export default function CheckoutWizardModal({
                         <motion.div
                           animate={{ rotateY: isCvvFocused ? 180 : 0 }}
                           transition={{ duration: 0.55 }}
-                          className="relative h-44 w-full max-w-md mx-auto rounded-3xl p-6 text-white shadow-2xl overflow-hidden bg-gradient-to-br from-[#1B2A23] via-[#0F1714] to-[#D15B2E]/85 border border-white/20 flex flex-col justify-between"
+                          className="relative h-40 sm:h-44 w-full max-w-md mx-auto rounded-3xl p-4 sm:p-6 text-white shadow-2xl overflow-hidden bg-gradient-to-br from-[#1B2A23] via-[#0F1714] to-[#D15B2E]/85 border border-white/20 flex flex-col justify-between"
                         >
                           {!isCvvFocused ? (
                             <>
-                              <div className="flex items-center justify-between">
-                                <span className="font-serif text-lg tracking-wider font-bold">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-serif text-sm sm:text-lg tracking-wider font-bold truncate">
                                   HOTEL GUERRERO · VIP PASS
                                 </span>
-                                <span className="font-mono text-xs px-2.5 py-0.5 rounded-full bg-white/15 border border-white/20">
-                                  VISA / MASTERCARD
+                                <span className="font-mono text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 rounded-full bg-white/15 border border-white/20 shrink-0">
+                                  VISA / MC
                                 </span>
                               </div>
 
-                              <div className="font-mono text-xl sm:text-2xl tracking-[0.18em] font-bold my-auto">
+                              <div className="font-mono text-base sm:text-2xl tracking-[0.12em] sm:tracking-[0.18em] font-bold my-auto truncate">
                                 {cardNumber || '•••• •••• •••• ••••'}
                               </div>
 

@@ -333,7 +333,7 @@ export default function HeroRenderShowcase({
           </div>
 
           {/* Anime.js Staggered Word-by-Word Headline */}
-          <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl text-white font-semibold leading-[1.04] tracking-tight flex flex-wrap gap-x-3 gap-y-1">
+          <h1 className="font-serif text-3xl sm:text-5xl lg:text-7xl text-white font-semibold leading-[1.06] tracking-tight flex flex-wrap gap-x-2.5 sm:gap-x-3 gap-y-1">
             {titleWords.map((word, idx) => (
               <span
                 key={`${currentScene.id}-w-${idx}`}
@@ -344,21 +344,82 @@ export default function HeroRenderShowcase({
             ))}
           </h1>
 
-          <p className="anime-hero-sub mt-4 text-sm sm:text-base md:text-lg text-white/80 max-w-xl leading-relaxed font-normal">
+          <p className="anime-hero-sub mt-3 sm:mt-4 text-xs sm:text-base md:text-lg text-white/80 max-w-xl leading-relaxed font-normal">
             {currentScene.subtitle}
           </p>
 
+          {/* Mobile & Tablet Interactive 3D Hotspot Chip Bar (Touch Friendly) */}
+          <div className="lg:hidden mt-4">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1.5">
+              {currentScene.hotspots.map((spot) => {
+                const isSelected = activeHotspot === spot.id;
+                return (
+                  <button
+                    key={spot.id}
+                    type="button"
+                    onClick={() => setActiveHotspot(isSelected ? null : spot.id)}
+                    className={`px-3 py-1.5 rounded-full text-[11px] font-mono whitespace-nowrap flex items-center gap-1.5 border transition-all ${
+                      isSelected
+                        ? 'bg-[#D15B2E] text-white border-[#D15B2E] shadow-md'
+                        : 'bg-black/50 text-white/85 border-white/20 backdrop-blur-md'
+                    }`}
+                  >
+                    <Plus
+                      className={`w-3 h-3 transition-transform ${
+                        isSelected ? 'rotate-45' : ''
+                      }`}
+                    />
+                    <span>{spot.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <AnimatePresence mode="wait">
+              {activeHotspot && (
+                <motion.div
+                  key={activeHotspot}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  className="mt-2 p-3 rounded-2xl bg-[#111915]/90 backdrop-blur-xl border border-white/20 text-white"
+                >
+                  {(() => {
+                    const spot =
+                      currentScene.hotspots.find((h) => h.id === activeHotspot) ||
+                      currentScene.hotspots[0];
+                    return (
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#E9A789]">
+                            {spot.tag} · {spot.title}
+                          </span>
+                          <span className="text-[9px] font-mono text-white/50">
+                            PUNTO 3D
+                          </span>
+                        </div>
+                        <p className="text-xs text-white/80 mt-1 leading-relaxed">
+                          {spot.detail}
+                        </p>
+                      </div>
+                    );
+                  })()}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {/* Live Atmospheric Telemetry Strip animated via Anime.js */}
-          <div className="mt-7 grid grid-cols-3 gap-3 max-w-lg">
+          <div className="mt-5 sm:mt-7 grid grid-cols-3 gap-2 sm:gap-3 max-w-lg">
             {currentScene.stats.map((st) => (
               <div
                 key={st.label}
-                className="anime-stat-card p-3 rounded-2xl bg-black/45 backdrop-blur-md border border-white/15"
+                className="anime-stat-card p-2.5 sm:p-3 rounded-2xl bg-black/45 backdrop-blur-md border border-white/15"
               >
-                <div className="text-[10px] font-mono uppercase tracking-wider text-white/55">
+                <div className="text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white/55 truncate">
                   {st.label}
                 </div>
-                <div className="text-xs sm:text-sm font-semibold text-white mt-0.5 font-mono">
+                <div className="text-[11px] sm:text-sm font-semibold text-white mt-0.5 font-mono truncate">
                   {st.value}
                 </div>
               </div>
@@ -470,7 +531,7 @@ export default function HeroRenderShowcase({
                     initial={{ opacity: 0, y: 12, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                    className="absolute left-0 bottom-full mb-4 w-80 sm:w-96 p-5 rounded-3xl bg-white dark:bg-[#16221D] border border-black/10 dark:border-white/15 shadow-2xl z-50"
+                    className="absolute left-0 right-0 sm:right-auto top-full mt-2 md:top-auto md:bottom-full md:mb-4 w-full sm:w-96 p-4 sm:p-5 rounded-3xl bg-white dark:bg-[#16221D] border border-black/10 dark:border-white/15 shadow-2xl z-50"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs font-mono uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
@@ -597,7 +658,7 @@ export default function HeroRenderShowcase({
                     initial={{ opacity: 0, y: 12, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                    className="absolute left-0 bottom-full mb-4 w-72 p-5 rounded-3xl bg-white dark:bg-[#16221D] border border-black/10 dark:border-white/15 shadow-2xl z-50 space-y-4"
+                    className="absolute left-0 right-0 sm:right-auto top-full mt-2 md:top-auto md:bottom-full md:mb-4 w-full sm:w-72 p-4 sm:p-5 rounded-3xl bg-white dark:bg-[#16221D] border border-black/10 dark:border-white/15 shadow-2xl z-50 space-y-4"
                   >
                     <div className="flex items-center justify-between">
                       <div>

@@ -98,49 +98,73 @@ export default function CabinDetailModal({
           {/* Modal Scrollable Body */}
           <div className="overflow-y-auto p-5 sm:p-8 space-y-8">
             {/* Airbnb Signature 5-Render Bento Gallery */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 h-[300px] sm:h-[380px]">
-              {/* Main Active Image (7 cols) */}
-              <div className="md:col-span-7 relative rounded-2xl overflow-hidden bg-neutral-900 h-full">
-                <AnimatePresence mode="wait">
-                  <motion.img
-                    key={cabin.images[activeImg]}
-                    src={cabin.images[activeImg]}
-                    alt={cabin.name}
-                    initial={{ opacity: 0.4, scale: 1.04 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0.4 }}
-                    transition={{ duration: 0.35 }}
-                    className="w-full h-full object-cover"
-                  />
-                </AnimatePresence>
-                <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-black/65 backdrop-blur-md text-white text-xs font-mono">
-                  Render {activeImg + 1} de {cabin.images.length} · {cabin.area}
+            <div className="space-y-2.5">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 h-[240px] sm:h-[360px]">
+                {/* Main Active Image (7 cols) */}
+                <div className="md:col-span-7 relative rounded-2xl overflow-hidden bg-neutral-900 h-full">
+                  <AnimatePresence mode="wait">
+                    <motion.img
+                      key={cabin.images[activeImg]}
+                      src={cabin.images[activeImg]}
+                      alt={cabin.name}
+                      initial={{ opacity: 0.4, scale: 1.04 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0.4 }}
+                      transition={{ duration: 0.35 }}
+                      className="w-full h-full object-cover"
+                    />
+                  </AnimatePresence>
+                  <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-black/65 backdrop-blur-md text-white text-xs font-mono">
+                    Render {activeImg + 1} de {cabin.images.length} · {cabin.area}
+                  </div>
+                </div>
+
+                {/* Right 2x2 Grid (5 cols on desktop/tablet) */}
+                <div className="hidden md:grid md:col-span-5 grid-cols-2 grid-rows-2 gap-3 h-full">
+                  {cabin.images.slice(1, 5).map((img, idx) => {
+                    const realIndex = idx + 1;
+                    const isCurrent = activeImg === realIndex;
+                    return (
+                      <div
+                        key={realIndex}
+                        onClick={() => setActiveImg(realIndex)}
+                        className={`relative rounded-2xl overflow-hidden cursor-pointer border-2 transition-all ${
+                          isCurrent
+                            ? 'border-[#D15B2E]'
+                            : 'border-transparent hover:opacity-90'
+                        }`}
+                      >
+                        <img
+                          src={img}
+                          alt="Vista secundaria"
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Right 2x2 Grid (5 cols) */}
-              <div className="hidden md:grid md:col-span-5 grid-cols-2 grid-rows-2 gap-3 h-full">
-                {cabin.images.slice(1, 5).map((img, idx) => {
-                  const realIndex = idx + 1;
-                  const isCurrent = activeImg === realIndex;
-                  return (
-                    <div
-                      key={realIndex}
-                      onClick={() => setActiveImg(realIndex)}
-                      className={`relative rounded-2xl overflow-hidden cursor-pointer border-2 transition-all ${
-                        isCurrent
-                          ? 'border-[#D15B2E]'
-                          : 'border-transparent hover:opacity-90'
-                      }`}
-                    >
-                      <img
-                        src={img}
-                        alt="Vista secundaria"
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                  );
-                })}
+              {/* Mobile Horizontal Thumbnail Strip */}
+              <div className="flex md:hidden items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                {cabin.images.map((img, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveImg(idx)}
+                    className={`relative w-16 h-12 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${
+                      activeImg === idx
+                        ? 'border-[#D15B2E] scale-105'
+                        : 'border-transparent opacity-65'
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`Miniatura ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
               </div>
             </div>
 
