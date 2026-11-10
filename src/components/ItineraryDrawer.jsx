@@ -81,7 +81,7 @@ export default function ItineraryDrawer({
               </div>
 
               {/* Combo 3x Progress Tracker */}
-              <div className="mt-4 p-3.5 rounded-2xl bg-white dark:bg-[#192520] border border-black/8 dark:border-white/10">
+              <div className="mt-4 p-3.5 rounded-2xl bg-white dark:bg-[#192520] border border-black/10 dark:border-white/10">
                 <div className="flex items-center justify-between text-[11px] font-semibold mb-2">
                   <span className="flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-[#D15B2E]" />
@@ -154,7 +154,7 @@ export default function ItineraryDrawer({
                           initial={{ opacity: 0, y: 12 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, x: 40 }}
-                          className="p-3.5 rounded-2xl bg-white dark:bg-[#192520] border border-black/8 dark:border-white/10 flex items-center gap-3.5 shadow-sm"
+                          className="p-3.5 rounded-2xl bg-white dark:bg-[#192520] border border-black/10 dark:border-white/10 flex items-center gap-3.5 shadow-sm"
                         >
                           {item.image ? (
                             <img

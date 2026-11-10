@@ -59,39 +59,57 @@ export default function HeroRenderShowcase({
 
   // 1. Anime.js Word-by-Word 3D Staggered Headline + Stats Choreography on Scene Switch
   useEffect(() => {
+    anime.suspendWhenDocumentHidden = false;
     anime.remove('.anime-hero-word, .anime-hero-sub, .anime-stat-card');
 
-    const tl = anime.timeline({ easing: 'easeOutExpo' });
+    const resetStyles = () => {
+      document
+        .querySelectorAll('.anime-hero-word, .anime-hero-sub, .anime-stat-card')
+        .forEach((el) => {
+          el.style.opacity = '1';
+          el.style.transform = '';
+        });
+    };
+
+    const tl = anime.timeline({
+      easing: 'easeOutExpo',
+      complete: resetStyles
+    });
 
     tl.add({
       targets: '.anime-hero-word',
-      translateY: [48, 0],
-      rotateZ: [6, 0],
-      opacity: [0, 1],
-      duration: 950,
-      delay: anime.stagger(55)
+      translateY: [28, 0],
+      rotateZ: [4, 0],
+      opacity: [0.2, 1],
+      duration: 750,
+      delay: anime.stagger(45)
     })
       .add(
         {
           targets: '.anime-hero-sub',
-          translateY: [20, 0],
-          opacity: [0, 1],
-          duration: 750
+          translateY: [14, 0],
+          opacity: [0.25, 1],
+          duration: 600
         },
-        '-=650'
+        '-=500'
       )
       .add(
         {
           targets: '.anime-stat-card',
-          scale: [0.85, 1],
-          translateY: [18, 0],
-          opacity: [0, 1],
-          duration: 800,
-          delay: anime.stagger(90),
+          scale: [0.92, 1],
+          translateY: [12, 0],
+          opacity: [0.3, 1],
+          duration: 650,
+          delay: anime.stagger(75),
           easing: 'easeOutElastic(1, .75)'
         },
-        '-=550'
+        '-=450'
       );
+
+    return () => {
+      tl.pause();
+      resetStyles();
+    };
   }, [activeSceneIndex]);
 
   // 2. Anime.js Continuous Atmospheric Particle Engine (Fireflies / Volcanic Embers / Trail Sparks)
@@ -187,7 +205,7 @@ export default function HeroRenderShowcase({
       {/* Background Architectural Render with Scroll + Mouse Parallax */}
       <div className="absolute inset-0 overflow-hidden z-0">
         <motion.div
-          style={{ scale: bgScale, y: bgY, x: smoothX, translateY: smoothY }}
+          style={{ scale: bgScale, y: bgY, x: smoothX }}
           className="w-full h-full"
         >
           <AnimatePresence mode="wait">

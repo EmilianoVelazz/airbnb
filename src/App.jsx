@@ -185,7 +185,7 @@ export default function App() {
   const [isMyTripsOpen, setIsMyTripsOpen] = useState(false);
   const [wizardDiscountApplied, setWizardDiscountApplied] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
-  const [introKey, setIntroKey] = useState(1);
+  const [introKey, setIntroKey] = useState(0);
 
   // Smooth Scroll Progress Bar at top of viewport
   const { scrollYProgress } = useScroll();

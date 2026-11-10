@@ -77,7 +77,7 @@ export default function CabinDetailModal({
           className="relative w-full max-w-6xl rounded-3xl bg-[#F7F4EF] dark:bg-[#121B17] text-[#1C1B19] dark:text-white border border-black/10 dark:border-white/15 shadow-2xl overflow-hidden my-auto max-h-[93vh] flex flex-col"
         >
           {/* Sticky Modal Top Header */}
-          <div className="px-6 py-4 bg-white/90 dark:bg-[#16221D]/90 backdrop-blur-md border-b border-black/8 dark:border-white/10 flex items-center justify-between shrink-0">
+          <div className="px-6 py-4 bg-white/90 dark:bg-[#16221D]/90 backdrop-blur-md border-b border-black/10 dark:border-white/10 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3 min-w-0">
               <span className="px-2.5 py-1 rounded-full bg-[#D15B2E]/15 text-[#D15B2E] font-mono text-[11px] font-bold shrink-0">
                 {cabin.altitude}

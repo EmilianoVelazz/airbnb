@@ -185,7 +185,7 @@ export default function Navbar({
               >
                 <Ticket className="w-3.5 h-3.5 text-[#E9A789]" />
                 <span className="hidden md:inline">Mis Pases QR</span>
-                <span className="px-1.5 py-0.2 rounded-full bg-white/20 font-mono text-[10px]">
+                <span className="px-1.5 py-0.5 rounded-full bg-white/20 font-mono text-[10px]">
                   {confirmedCount}
                 </span>
               </motion.button>

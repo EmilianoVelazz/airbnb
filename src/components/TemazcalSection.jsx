@@ -419,7 +419,7 @@ export default function TemazcalSection({
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1, duration: 0.5 }}
                   whileHover={{ y: -5 }}
-                  className="rounded-3xl bg-[#151F1B] border border-white/12 p-6 flex flex-col justify-between hover:border-[#D15B2E]/60 transition-all shadow-xl"
+                  className="rounded-3xl bg-[#151F1B] border border-white/15 p-6 flex flex-col justify-between hover:border-[#D15B2E]/60 transition-all shadow-xl"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-3">

@@ -165,7 +165,7 @@ export default function CheckoutWizardModal({
           className="relative w-full max-w-5xl rounded-3xl bg-[#F7F4EF] dark:bg-[#121B17] text-[#1C1B19] dark:text-white border border-black/10 dark:border-white/15 shadow-2xl overflow-hidden my-auto max-h-[94vh] flex flex-col"
         >
           {/* Top Wizard Header & Stepper */}
-          <div className="px-6 py-4 bg-white dark:bg-[#16221D] border-b border-black/8 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
+          <div className="px-6 py-4 bg-white dark:bg-[#16221D] border-b border-black/10 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
             <div>
               <span className="text-[10px] font-mono uppercase tracking-widest text-[#D15B2E] flex items-center gap-1.5">
                 <Lock className="w-3 h-3" />
@@ -292,7 +292,7 @@ export default function CheckoutWizardModal({
                     </div>
 
                     {/* Arrival Window & Cabin Preparation */}
-                    <div className="p-4 rounded-2xl bg-white dark:bg-[#18241F] border border-black/8 dark:border-white/10 space-y-3">
+                    <div className="p-4 rounded-2xl bg-white dark:bg-[#18241F] border border-black/10 dark:border-white/10 space-y-3">
                       <label className="text-xs font-bold flex items-center gap-1.5">
                         <Clock className="w-4 h-4 text-[#D15B2E]" />
                         Horario estimado de llegada al bosque ({searchFilters?.checkIn}):

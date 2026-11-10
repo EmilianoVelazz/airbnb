@@ -4,10 +4,21 @@ import { Trees, Sparkles } from 'lucide-react';
 
 export default function AnimeIntroOverlay({ onComplete }) {
   const overlayRef = useRef(null);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     if (!visible) return;
+    anime.suspendWhenDocumentHidden = false;
+
+    const finishIntro = () => {
+      setVisible(false);
+      if (onCompleteRef.current) onCompleteRef.current();
+    };
+
+    // Safety fallback timer so overlay never gets stuck
+    const safetyTimer = setTimeout(finishIntro, 3200);
 
     // Set initial SVG dashoffset for line drawing
     const paths = overlayRef.current?.querySelectorAll('.anime-draw-path');
@@ -21,50 +32,47 @@ export default function AnimeIntroOverlay({ onComplete }) {
 
     const tl = anime.timeline({
       easing: 'easeOutExpo',
-      complete: () => {
-        setVisible(false);
-        if (onComplete) onComplete();
-      }
+      complete: finishIntro
     });
 
     // 1. Draw the architectural mountain + A-Frame cabin SVG lines
     tl.add({
       targets: '.anime-draw-path',
       strokeDashoffset: [anime.setDashoffset, 0],
-      duration: 1350,
-      delay: anime.stagger(160),
+      duration: 1100,
+      delay: anime.stagger(120),
       easing: 'easeInOutSine'
     })
       // 2. Staggered 3D letter reveal for "HOTEL GUERRERO"
       .add(
         {
           targets: '.anime-intro-letter',
-          translateY: [55, 0],
-          rotateZ: [8, 0],
+          translateY: [40, 0],
+          rotateZ: [6, 0],
           opacity: [0, 1],
-          duration: 850,
-          delay: anime.stagger(42, { from: 'center' })
+          duration: 700,
+          delay: anime.stagger(35, { from: 'center' })
         },
-        '-=800'
+        '-=700'
       )
       // 3. Subtitle & altitude counter reveal
       .add(
         {
           targets: '.anime-intro-sub',
-          translateY: [20, 0],
+          translateY: [16, 0],
           opacity: [0, 1],
-          duration: 650,
-          delay: anime.stagger(110)
+          duration: 550,
+          delay: anime.stagger(90)
         },
-        '-=500'
+        '-=450'
       )
       // 4. Fade out center emblem
       .add({
         targets: '.anime-intro-center',
-        scale: [1, 0.94],
+        scale: [1, 0.95],
         opacity: [1, 0],
-        duration: 450,
-        delay: 280,
+        duration: 380,
+        delay: 220,
         easing: 'easeInQuad'
       })
       // 5. Staggered 5-column architectural shutter curtain opening
@@ -72,17 +80,18 @@ export default function AnimeIntroOverlay({ onComplete }) {
         {
           targets: '.anime-shutter-col',
           translateY: ['0%', '-102%'],
-          duration: 850,
-          delay: anime.stagger(75, { from: 'center' }),
+          duration: 700,
+          delay: anime.stagger(65, { from: 'center' }),
           easing: 'easeInOutQuart'
         },
         '-=150'
       );
 
     return () => {
+      clearTimeout(safetyTimer);
       tl.pause();
     };
-  }, [visible, onComplete]);
+  }, [visible]);
 
   if (!visible) return null;
 

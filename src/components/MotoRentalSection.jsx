@@ -37,44 +37,55 @@ export default function MotoRentalSection({
   // Anime.js SVG Path Follower + Line Drawing on Zacatlán Trail Change!
   useEffect(() => {
     if (!trailSvgRef.current) return;
+    anime.suspendWhenDocumentHidden = false;
     const pathEl = trailSvgRef.current.querySelector('.anime-trail-curve');
     const riderEl = trailSvgRef.current.querySelector('.anime-trail-rider');
-    const bars = trailSvgRef.current.querySelectorAll('.anime-alt-bar');
+    const bars = Array.from(
+      trailSvgRef.current.querySelectorAll('.anime-alt-bar')
+    );
 
     if (pathEl && riderEl) {
-      anime.remove([pathEl, riderEl, bars]);
+      anime.remove([pathEl, riderEl, ...bars]);
 
-      // 1. Draw the SVG topographic path
-      anime({
-        targets: pathEl,
-        strokeDashoffset: [anime.setDashoffset, 0],
-        duration: 2200,
-        easing: 'easeInOutSine'
-      });
+      try {
+        // 1. Draw the SVG topographic path
+        anime({
+          targets: pathEl,
+          strokeDashoffset: [anime.setDashoffset, 0],
+          duration: 2000,
+          easing: 'easeInOutSine'
+        });
 
-      // 2. Move the glowing Moto GPS Beacon along the SVG path using anime.path()
-      const motionPath = anime.path(pathEl);
-      anime({
-        targets: riderEl,
-        translateX: motionPath('x'),
-        translateY: motionPath('y'),
-        rotate: motionPath('angle'),
-        duration: 4200,
-        loop: true,
-        easing: 'easeInOutSine'
-      });
+        // 2. Move the glowing Moto GPS Beacon along the SVG path using anime.path()
+        const motionPath = anime.path(pathEl);
+        anime({
+          targets: riderEl,
+          translateX: motionPath('x'),
+          translateY: motionPath('y'),
+          rotate: motionPath('angle'),
+          duration: 4200,
+          loop: true,
+          easing: 'easeInOutSine'
+        });
+      } catch {
+        // fallback if SVG path length is not ready
+      }
     }
 
     if (bars.length) {
       anime({
         targets: bars,
-        scaleY: [0, 1],
-        opacity: [0.2, 1],
-        duration: 950,
-        delay: anime.stagger(75),
+        scaleY: [0.35, 1],
+        opacity: [0.5, 1],
+        duration: 850,
+        delay: anime.stagger(65),
         easing: 'easeOutElastic(1, .75)'
       });
     }
+
+    return () => {
+      anime.remove([pathEl, riderEl, ...bars]);
+    };
   }, [activeTrailIdx]);
 
   const updateQty = (id, delta) => {

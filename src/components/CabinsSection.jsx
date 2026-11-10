@@ -143,10 +143,10 @@ function CabinCard({
         setIsHovered(false);
       }}
       onClick={() => onSelectCabin(cabin)}
-      className={`anime-cabin-card group cursor-pointer rounded-3xl bg-white dark:bg-[#151F1B] border overflow-hidden transition-shadow duration-300 flex flex-col hover:-translate-y-1.5 ${
+      className={`anime-cabin-card group cursor-pointer rounded-3xl bg-white dark:bg-[#151F1B] border overflow-hidden transition-all duration-300 flex flex-col hover:-translate-y-1.5 ${
         isBookedInItinerary
           ? 'border-[#2E4F42] ring-2 ring-[#2E4F42]/30 shadow-xl'
-          : 'border-black/8 dark:border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_24px_48px_rgba(209,91,46,0.16)]'
+          : 'border-black/10 dark:border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_24px_48px_rgba(209,91,46,0.16)]'
       }`}
     >
       {/* Image Render Carousel Container */}
@@ -335,7 +335,7 @@ function CabinCard({
         </div>
 
         {/* Footer Price & Micro-Actions */}
-        <div className="mt-4 pt-3.5 border-t border-black/8 dark:border-white/10 flex items-center justify-between gap-2">
+        <div className="mt-4 pt-3.5 border-t border-black/10 dark:border-white/10 flex items-center justify-between gap-2">
           <div>
             <div className="flex items-baseline gap-1">
               <span className="font-mono text-lg font-bold text-[#1C1B19] dark:text-white">
@@ -485,19 +485,33 @@ export default function CabinsSection({
   // Anime.js Staggered 3D Grid Cascade whenever category, sort, or filters change!
   useEffect(() => {
     if (!gridRef.current) return;
-    const cards = gridRef.current.querySelectorAll('.anime-cabin-card');
+    anime.suspendWhenDocumentHidden = false;
+    const cards = Array.from(gridRef.current.querySelectorAll('.anime-cabin-card'));
     if (!cards.length) return;
 
+    const clearCardStyles = () => {
+      cards.forEach((c) => {
+        c.style.opacity = '1';
+        c.style.transform = '';
+      });
+    };
+
     anime.remove(cards);
-    anime({
+    const anim = anime({
       targets: cards,
-      translateY: [42, 0],
-      scale: [0.93, 1],
-      opacity: [0, 1],
-      duration: 820,
-      delay: anime.stagger(85, { from: 'first' }),
-      easing: 'easeOutExpo'
+      translateY: [24, 0],
+      scale: [0.96, 1],
+      opacity: [0.35, 1],
+      duration: 650,
+      delay: anime.stagger(65, { from: 'first' }),
+      easing: 'easeOutExpo',
+      complete: clearCardStyles
     });
+
+    return () => {
+      anim.pause();
+      clearCardStyles();
+    };
   }, [
     selectedCategory,
     sortBy,
@@ -721,7 +735,7 @@ export default function CabinsSection({
               )}
               <span className="relative z-10">{cat.label}</span>
               <span
-                className={`relative z-10 text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                className={`relative z-10 text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
                   active
                     ? 'bg-white/20 text-white'
                     : 'bg-black/5 dark:bg-white/10 text-neutral-500'
@@ -757,18 +771,18 @@ export default function CabinsSection({
       ) : (
         <div
           ref={gridRef}
-          className={`grid gap-7 items-start ${
+          className={
             splitMapView
-              ? 'grid-cols-1 lg:grid-cols-12'
-              : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-          }`}
+              ? 'grid grid-cols-1 lg:grid-cols-12 gap-7 items-start'
+              : 'block'
+          }
         >
-          {/* Left Cards Column (When splitMapView is active) */}
+          {/* Cards Grid */}
           <div
             className={
               splitMapView
                 ? 'lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6'
-                : 'contents'
+                : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7'
             }
           >
             {filteredCabins.map((cabin) => (
